@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Feedline: dairy ration formulation</title>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><b>Feedline</b><span>Dairy ration formulation</span></div>
+    <button class="btn" type="button">Vaalkop Dairy, Lichtenburg</button>
+    <div class="topbar-right">
+      <span class="pill proto">Prototype, mock data</span>
+      <button class="btn" id="themebtn" type="button" aria-label="Switch light and dark">Light / dark</button>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="tabs-in" role="tablist">
+    <button class="tab" role="tab" aria-selected="true"  data-screen="formulate">Formulate</button>
+    <button class="tab" role="tab" aria-selected="false" data-screen="herd">Herd</button>
+    <button class="tab" role="tab" aria-selected="false" data-screen="feeds">Feeds &amp; prices</button>
+    <button class="tab" role="tab" aria-selected="false" data-screen="mixer">Mixer sheet</button>
+    <button class="tab" role="tab" aria-selected="false" data-screen="farms">Farms</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- FORMULATE: the three-zone workspace -->
+  <section id="formulate" class="screen on" role="tabpanel">
+    <div class="ctxstrip" id="ctx-cells"></div>
+
+    <div class="work">
+      <aside class="panel req" id="req" aria-label="Requirement"></aside>
+
+      <section class="panel" aria-labelledby="rt-h">
+        <div class="panel-hd">
+          <h2 id="rt-h">Ration, dry-matter basis</h2>
+          <div class="actions">
+            <button class="btn primary" id="solve" type="button">Auto-formulate</button>
+            <button class="btn" id="showinf" type="button">Try NEL floor 1.65</button>
+            <button class="btn" id="reset" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="rt-head">
+          <div>Ingredient / source</div><div>Adjust</div>
+          <div class="ta">kg DM/d</div><div class="ta">kg as-fed</div><div class="ta">% DM</div><div class="ta">R/day</div>
+        </div>
+        <div id="rows"></div>
+        <div class="rt-foot">
+          <div class="ing">Total</div><div></div>
+          <div class="ta num" id="tot-dm"></div><div class="ta num c-af" id="tot-af"></div>
+          <div class="ta num c-pct">100.0</div><div class="ta num c-cost" id="tot-cost"></div>
+        </div>
+      </section>
+
+      <div class="rail">
+        <section class="panel" aria-labelledby="nb-h">
+          <div class="panel-hd"><h2 id="nb-h">Nutrient balance</h2><span class="note" id="band-count"></span></div>
+          <div id="bands"></div>
+        </section>
+        <section class="panel" style="margin-top:14px">
+          <div class="panel-hd"><h3>What is driving cost</h3></div>
+          <div class="panel-bd" id="drivers"></div>
+        </section>
+      </div>
+    </div>
+
+    <p id="error" class="diag" hidden></p>
+    <div id="diag" class="diag" hidden></div>
+
+    <div class="econ">
+      <div class="cell money"><span class="k">Feed cost per cow</span><div class="v num" id="e-cost"></div><div class="sub num" id="e-perkg"></div></div>
+      <div class="cell money"><span class="k">Group, per day</span><div class="v num" id="e-group"></div><div class="sub" id="e-groupsub"></div></div>
+      <div class="cell money"><span class="k">Margin over feed cost</span><div class="v num" id="e-mofc"></div><div class="sub">Milk at R8.20/kg, excl. VAT</div></div>
+      <div class="cell"><span class="k">Feed efficiency, ECM / DMI</span><div class="v num" id="e-eff"></div><div class="sub" id="e-effsub"></div></div>
+      <div class="cell"><span class="k">Energy-corrected milk</span><div class="v num" id="e-ecm"></div></div>
+    </div>
+
+    <div class="approve">
+      <button class="btn primary" type="button">Approve ration</button>
+      <p>Approving writes this ration, its prices and your name to the audit log. Feedline supports nutritional judgment, it does not replace it.</p>
+    </div>
+  </section>
+
+  <!-- The other four screens are filled in by js/screens.js -->
+  <section id="herd"  class="screen" role="tabpanel"></section>
+  <section id="feeds" class="screen" role="tabpanel"></section>
+
+  <section id="mixer" class="screen" role="tabpanel">
+    <p class="lede">Weights are cumulative, because that is what a scale head reads.</p>
+    <div class="grid-2">
+      <div id="mx-sheet"></div>
+      <div class="panel">
+        <div class="panel-hd"><h3>Batch settings</h3></div>
+        <div class="panel-bd">
+          <div class="field"><label for="mx-cows">Cows in this load</label><input id="mx-cows" inputmode="numeric"></div>
+          <div class="field"><label for="mx-dm">Target ration dry matter<small>Water makes up the difference</small></label><input id="mx-dm" inputmode="decimal"></div>
+          <ul class="note-list" style="margin-top:12px">
+            <li>Long forage first, so the knives have something to cut against.</li>
+            <li>Minerals before liquids, or they stick to the wet wall of the tub.</li>
+            <li>Molasses and water last, so mixing time stays short.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="farms" class="screen" role="tabpanel"></section>
+</main>
+
+<!-- Order matters: each file uses what the one before it defined. -->
+<script src="js/data.js"></script>
+<script src="js/compute.js"></script>
+<script src="js/render.js"></script>
+<script src="js/screens.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

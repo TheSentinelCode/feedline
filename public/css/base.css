@@ -1,0 +1,30 @@
+/* BASE: resets and the defaults every element inherits. */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font); font-size: 14px; line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.015em; }
+p { margin: 0 0 10px; }
+button, select, input { font: inherit; color: inherit; }
+[hidden] { display: none !important; }   /* the hidden attribute must always win */
+
+/* Tabular figures: every digit the same width, so columns of numbers align. */
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.ta  { text-align: right; }
+
+.btn {
+  border: 1px solid var(--rule-strong); background: var(--surface-2);
+  border-radius: 5px; padding: 6px 11px; font-weight: 500; cursor: pointer;
+}
+.btn:hover { background: var(--surface-3); }
+.btn.primary { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.btn.primary:hover { opacity: .9; }
+select, .field input {
+  background: var(--surface-2); border: 1px solid var(--rule);
+  border-radius: 5px; padding: 5px 8px;
+}
+:focus-visible { outline: 2px solid var(--ok); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
