@@ -43,6 +43,53 @@ const BANDS = [
   { key: "DCAD",   label: "DCAD",            unit: "mEq/100 g", lo: 25,   hi: null, axis: [-10, 70],     dp: 0 }
 ];
 
+// --- MULTI-SPECIES PROFILES ---
+const SPECIES_PROFILES = {
+  dairy_lactating: {
+    id: "dairy_lactating",
+    name: "Dairy Cattle (Lactating - NRC 2001)",
+    basis: "DM",
+    energyUnit: "Mcal NEL/kg",
+    bands: [
+      { key: "CP",     label: "Crude protein",   unit: "%",         lo: 16.0, hi: 17.5, axis: [12, 20],      dp: 2 },
+      { key: "NEL",    label: "Net energy",      unit: "Mcal/kg",   lo: 1.58, hi: null, axis: [1.30, 1.85],  dp: 3 },
+      { key: "NDF",    label: "NDF",             unit: "%",         lo: 28,   hi: 36,   axis: [22, 42],      dp: 1 },
+      { key: "peNDF",  label: "Effective NDF",   unit: "%",         lo: 20,   hi: null, axis: [12, 32],      dp: 1 },
+      { key: "Starch", label: "Starch",          unit: "%",         lo: null, hi: 28,   axis: [8, 36],       dp: 1 },
+      { key: "Sugar",  label: "Sugar",           unit: "%",         lo: 4,    hi: 8,    axis: [0, 12],       dp: 1 },
+      { key: "Fat",    label: "Crude fat",       unit: "%",         lo: null, hi: 6,    axis: [0, 9],        dp: 2 },
+      { key: "Ca",     label: "Calcium",         unit: "%",         lo: 0.80, hi: 1.10, axis: [0.4, 1.5],    dp: 2 },
+      { key: "P",      label: "Phosphorus",      unit: "%",         lo: 0.38, hi: 0.50, axis: [0.2, 0.7],    dp: 2 },
+      { key: "DCAD",   label: "DCAD",            unit: "mEq/100 g", lo: 25,   hi: null, axis: [-10, 70],     dp: 0 }
+    ]
+  },
+  broiler_grower: {
+    id: "broiler_grower",
+    name: "Broiler Chicken (Grower 11-24d - Ross 308)",
+    basis: "As-Fed (88% DM)",
+    energyUnit: "kcal AMEn/kg",
+    bands: [
+      { key: "CP",      label: "Crude protein",   unit: "%",       lo: 21.0, hi: 21.5, axis: [16, 26], dp: 1 },
+      { key: "AMEn",    label: "Energy (AMEn)",   unit: "kcal/kg", lo: 3050, hi: null, axis: [2700, 3400], dp: 0 },
+      { key: "SID_Lys", label: "SID Lysine",      unit: "%",       lo: 1.10, hi: 1.15, axis: [0.8, 1.5], dp: 2 },
+      { key: "Ca",      label: "Calcium",         unit: "%",       lo: 0.85, hi: 0.95, axis: [0.5, 1.2], dp: 2 },
+      { key: "aP",      label: "Avail. Phosphorus", unit: "%",     lo: 0.42, hi: null, axis: [0.2, 0.6], dp: 2 }
+    ]
+  },
+  pig_finisher: {
+    id: "pig_finisher",
+    name: "Pig (Finisher 85-120kg - PIC Standard)",
+    basis: "As-Fed (88% DM)",
+    energyUnit: "kcal NE/kg",
+    bands: [
+      { key: "CP",      label: "Crude protein",   unit: "%",       lo: 14.5, hi: 15.5, axis: [10, 20], dp: 1 },
+      { key: "NE",      label: "Net Energy",      unit: "kcal/kg", lo: 2400, hi: null, axis: [2100, 2700], dp: 0 },
+      { key: "SID_Lys", label: "SID Lysine",      unit: "%",       lo: 0.75, hi: null, axis: [0.5, 1.1], dp: 2 },
+      { key: "Ca",      label: "Calcium",         unit: "%",       lo: 0.55, hi: 0.65, axis: [0.3, 0.9], dp: 2 },
+      { key: "STTD_P",  label: "STTD Phosphorus", unit: "%",       lo: 0.28, hi: null, axis: [0.1, 0.5], dp: 2 }
+    ]
+  }
+};
 // The animal group. Mutable: the Herd screen edits these numbers.
 const GROUP = {
   name: "High group, Pen 3", breed: "Holstein-Friesian", cows: 48,
