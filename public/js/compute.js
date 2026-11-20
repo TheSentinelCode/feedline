@@ -20,7 +20,11 @@ function asFed(kgDm, dmPercent, label) {
 // DCAD in mEq per 100 g DM. Each percentage is divided by the ion's equivalent weight.
 // The sulphur divisor is 0.016 (not 0.032) because sulphur carries two charges.
 function dcad(n) {
-  return n.Na / 0.023 + n.K / 0.039 - n.Cl / 0.0355 - n.S / 0.016;
+  const na = n.Na || 0;
+  const k = n.K || 0;
+  const cl = n.Cl || 0;
+  const s = n.S || 0;
+  return na / 0.023 + k / 0.039 - cl / 0.0355 - s / 0.016;
 }
 
 // Energy-corrected milk, metric coefficients only. NRC 2001 style.
@@ -50,7 +54,10 @@ function compute(state, ingredients) {
     totalDm += kg;
     totalAsFed += asFed(kg, ing.dm, ing.name);
     totalCost += kg * ing.price;
-    NUTRIENT_LIST.forEach(k => { sums[k] += kg * ing.n[k]; });
+    NUTRIENT_LIST.forEach(k => { 
+      const nutrientVal = (ing.n && ing.n[k] !== undefined) ? ing.n[k] : 0;
+      sums[k] += kg * nutrientVal; 
+    });
   });
 
   // Weighted average: sum(kg x percent) / total kg. 0/0 is NaN, so guard the empty ration.
