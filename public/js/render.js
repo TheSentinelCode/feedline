@@ -51,21 +51,47 @@ function renderContext() {
   const cell = (k, v) => '<div class="cell"><span class="k">' + k + '</span><span class="v num">' + v + '</span></div>';
   const ctxCells = document.getElementById("ctx-cells");
   if (ctxCells) {
-    ctxCells.innerHTML =
-      cell("Group", esc(GROUP.name)) + cell("Animals", GROUP.cows + " " + esc(GROUP.breed)) +
-      cell("Mean DIM", GROUP.dim) + cell("Milk", GROUP.milk + " kg, " + GROUP.fat + " F, " + GROUP.protein + " P");
+    if (GROUP.birds !== undefined) {
+      ctxCells.innerHTML =
+        cell("Batch", esc(GROUP.name)) + cell("Breed", esc(GROUP.breed)) +
+        cell("Birds", GROUP.birds) + cell("Age", GROUP.ageDays + " days");
+    } else if (GROUP.pigs !== undefined) {
+      ctxCells.innerHTML =
+        cell("Batch", esc(GROUP.name)) + cell("Breed", esc(GROUP.breed)) +
+        cell("Pigs", GROUP.pigs) + cell("Live Wt", GROUP.bodyWeight + " kg");
+    } else {
+      ctxCells.innerHTML =
+        cell("Group", esc(GROUP.name)) + cell("Animals", GROUP.cows + " " + esc(GROUP.breed)) +
+        cell("Mean DIM", GROUP.dim) + cell("Milk", GROUP.milk + " kg, " + GROUP.fat + " F, " + GROUP.protein + " P");
+    }
   }
 }
 
 function renderRail(result) {
-  const need = nrc(GROUP);
-  const nelVal = (result.nutrients && result.nutrients.NEL !== undefined) ? result.nutrients.NEL : 0;
-  const balance = nelVal * result.totalDm - need.nelTotal;
-  const intakePct = GROUP.measuredDmi / need.dmi * 100;
+  const reqEl = document.getElementById("req");
+  if (!reqEl) return;
+
   const row = (k, v, unit, sub) =>
     '<div class="row"><div class="k">' + k + '</div><div class="v num">' + v + '<em>' + unit + '</em></div><div class="sub">' + sub + '</div></div>';
-  const reqEl = document.getElementById("req");
-  if (reqEl) {
+
+  if (GROUP.birds !== undefined || GROUP.pigs !== undefined) {
+    // Non-ruminant view (Broiler / Pig)
+    const animalType = GROUP.birds !== undefined ? "Broiler (Ross 308)" : "Pig Finisher (PIC)";
+    const targetEnergy = result.nutrients.AMEn || result.nutrients.NE || 0;
+    
+    reqEl.innerHTML =
+      row("Animal Category", animalType, "", GROUP.name) +
+      row("Estimated Intake", (result.totalAsFed * (GROUP.birds || GROUP.pigs)).toFixed(1), "kg as-fed/d", "Total batch consumption") +
+      row("Dietary Energy Density", targetEnergy.toFixed(0), GROUP.birds !== undefined ? "kcal AMEn/kg" : "kcal NE/kg", "Concentration check") +
+      row("Crude Protein", (result.nutrients.CP || 0).toFixed(2), "%", "Balanced profile") +
+      row("Digestible Amino Acids", (result.nutrients.SID_Lys || 0).toFixed(2), "% SID Lys", "Primary limiting amino acid");
+  } else {
+    // Dairy view (NRC 2001)
+    const need = nrc(GROUP);
+    const nelVal = (result.nutrients && result.nutrients.NEL !== undefined) ? result.nutrients.NEL : 0;
+    const balance = nelVal * result.totalDm - need.nelTotal;
+    const intakePct = GROUP.measuredDmi / need.dmi * 100;
+
     reqEl.innerHTML =
       row("Predicted intake", need.dmi.toFixed(2), "kg DM/d", "NRC 2001, lactating cow") +
       row("Measured intake", GROUP.measuredDmi.toFixed(2), "kg DM/d",
@@ -123,22 +149,43 @@ function renderFormulate(state) {
     count.style.color = broken === 0 ? "var(--ok)" : "var(--over)";
   }
 
-  const milkEcm = ecm(GROUP.milk, GROUP.fat, GROUP.protein);
-  const eff = r.totalDm > 0 ? milkEcm / r.totalDm : 0;
+  // --- DYNAMIC SPECIES SUMMARY CARD ADAPTATION ---
   setText("e-cost", money(r.totalCost));
   setText("e-perkg", r.totalDm > 0 ? money(r.totalCost / r.totalDm) + " per kg DM" : "");
-  setText("e-group", "R" + Math.round(r.totalCost * GROUP.cows).toLocaleString("en-ZA"));
-  setText("e-groupsub", GROUP.cows + " cows");
-  setText("e-mofc", money(GROUP.milk * GROUP.milkPrice - r.totalCost));
-  setText("e-eff", r.totalDm > 0 ? eff.toFixed(2) : "-");
-  
-  const effSub = document.getElementById("e-effsub");
-  if (effSub) {
-    effSub.textContent = eff >= 1.5 ? "Above the 1.50 target" : "Below 1.50, investigate";
-    effSub.style.color = eff >= 1.5 ? "var(--ok)" : "var(--over)";
+
+  if (GROUP.birds !== undefined) {
+    const totalBirds = GROUP.birds;
+    setText("e-group", "R" + Math.round(r.totalCost * totalBirds * 0.1).toLocaleString("en-ZA"));
+    setText("e-groupsub", totalBirds + " broilers");
+    setText("e-mofc", "N/A (Grower)");
+    setText("e-eff", "-");
+    setText("e-ecm", "Batch feed");
+    const effSub = document.getElementById("e-effsub");
+    if (effSub) effSub.textContent = "Monitor FCR weekly";
+  } else if (GROUP.pigs !== undefined) {
+    const totalPigs = GROUP.pigs;
+    setText("e-group", "R" + Math.round(r.totalCost * totalPigs * 0.5).toLocaleString("en-ZA"));
+    setText("e-groupsub", totalPigs + " finishers");
+    setText("e-mofc", "Margin over feed");
+    setText("e-eff", "-");
+    setText("e-ecm", "Finishing phase");
+    const effSub = document.getElementById("e-effsub");
+    if (effSub) effSub.textContent = "Target ADG > 950g/d";
+  } else {
+    const milkEcm = ecm(GROUP.milk, GROUP.fat, GROUP.protein);
+    const eff = r.totalDm > 0 ? milkEcm / r.totalDm : 0;
+    setText("e-group", "R" + Math.round(r.totalCost * GROUP.cows).toLocaleString("en-ZA"));
+    setText("e-groupsub", GROUP.cows + " cows");
+    setText("e-mofc", money(GROUP.milk * GROUP.milkPrice - r.totalCost));
+    setText("e-eff", r.totalDm > 0 ? eff.toFixed(2) : "-");
+    const effSub = document.getElementById("e-effsub");
+    if (effSub) {
+      effSub.textContent = eff >= 1.5 ? "Above the 1.50 target" : "Below 1.50, investigate";
+      effSub.style.color = eff >= 1.5 ? "var(--ok)" : "var(--over)";
+    }
+    setText("e-ecm", milkEcm.toFixed(1) + " kg");
   }
 
-  setText("e-ecm", milkEcm.toFixed(1) + " kg");
   renderRail(r);
   renderDrivers();
 }

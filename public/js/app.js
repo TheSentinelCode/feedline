@@ -25,6 +25,33 @@ function init() {
 
   document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => showScreen(t.dataset.screen)));
 
+  // --- MULTI-SPECIES SELECTOR WIRING ---
+const speciesSelect = document.getElementById("species-select");
+  if (speciesSelect) {
+    speciesSelect.addEventListener("change", (e) => {
+      const activeSpecies = e.target.value;
+      const profile = SPECIES_PROFILES[activeSpecies];
+      
+      if (profile) {
+        // 1. Swap global BANDS array reference
+        BANDS.length = 0;
+        Array.prototype.push.apply(BANDS, profile.bands);
+
+        // 2. Update active GROUP object properties in place
+        Object.keys(GROUP).forEach(k => delete GROUP[k]);
+        Object.assign(GROUP, profile.group);
+
+        // 3. Load the species-specific default state weights
+        state = [...profile.defaultState];
+
+        // 4. Rebuild UI components for the new species
+        buildBands(BANDS);
+        buildRows(INGREDIENTS, state, (i, value) => { state[i] = value; renderAll(); });
+        renderAll();
+      }
+    });
+  }
+
   document.getElementById("solve").addEventListener("click", () => {
     state = INGREDIENTS.map(i => i.sol);        // Phase 3 replaces this with a call to the server
     document.getElementById("diag").hidden = true;
